@@ -1,6 +1,7 @@
 import datetime
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 import requests
 
@@ -27,6 +28,7 @@ class Chat(ttk.Frame):
             command=self.get_messages,
         )
         message_fetch.pack()
+        self.update_message_widgets()
     
     def get_messages(self):
         global messages
@@ -43,20 +45,43 @@ class Chat(ttk.Frame):
                 "%d-%m-%Y %H:%M:%S"
             )
             if (message["message"], message_time) not in existing_labels:
-                container = ttk.Frame(self.messages_frame)
-                container.columnconfigure(1, weight=1)
-                container.grid(sticky="EW", padx=(10, 50), pady=10)
+                self._create_message_container(message["message"], message_time, message_labels)
 
-                time_label = ttk.Label(container, text=message_time)
-                time_label.grid(row=0, column=0, sticky="NEW")
+    def _create_message_container(self, message_content, message_time, message_labels):
+        container = ttk.Frame(self.messages_frame)
+        container.columnconfigure(1, weight=1)
+        container.grid(sticky="EW", padx=(10, 50), pady=10)
 
-                message_label = ttk.Label(
-                    container,
-                    text=message["message"],
-                    anchor="w",
-                    justify="left",
-                )
+        self._create_message_bubble(container, message_content, message_time, message_labels)
+    
+    def _create_message_bubble(self, container, message_content, message_time, message_labels):
+        avatar_image = Image.open("./assets/male.png")
+        avatar_photo = ImageTk.PhotoImage(avatar_image)
 
-                message_label.grid(row=1, column=0, sticky="NSEW")
+        avatar_label = ttk.Label(
+            container,
+            image=avatar_photo,
+        )
+        avatar_label.image = avatar_photo
+        avatar_label.grid(
+            row=0,
+            column=0,
+            rowspan=2,
+            sticky="NEW",
+            padx=(0, 10),
+            pady=(5, 0),
+        )
 
-                message_labels.append((message_label, time_label))
+        time_label = ttk.Label(container, text=message_time)
+        time_label.grid(row=0, column=1, sticky="NEW")
+
+        message_label = ttk.Label(
+            container,
+            text=message_content,
+            anchor="w",
+            justify="left",
+        )
+
+        message_label.grid(row=1, column=1, sticky="NSEW")
+
+        message_labels.append((message_label, time_label))
