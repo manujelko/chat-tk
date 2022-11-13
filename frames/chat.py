@@ -10,16 +10,16 @@ message_labels = []
 
 
 class Chat(ttk.Frame):
-    def __init__(self, container, **kwargs):
+    def __init__(self, container, background, **kwargs):
         super().__init__(container, **kwargs)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.message_window = MessageWindow(self)
+        self.message_window = MessageWindow(self, background=background)
         self.message_window.grid(row=0, column=0, sticky="NSEW", pady=5)
 
-        input_frame = ttk.Frame(self, padding=10)
+        input_frame = ttk.Frame(self, style="Controls.TFrame", padding=10)
         input_frame.grid(row=1, column=0, sticky="EW")
 
         self.message_input = tk.Text(input_frame, height=3)
@@ -28,6 +28,7 @@ class Chat(ttk.Frame):
         message_submit = ttk.Button(
             input_frame,
             text="Send",
+            style="SendButton.TButton",
             command=self.post_message,
         )
         message_submit.pack()
@@ -35,6 +36,7 @@ class Chat(ttk.Frame):
         message_fetch = ttk.Button(
             input_frame,
             text="Fetch",
+            style="FetchButton.TButton",
             command=self.get_messages,
         )
         message_fetch.pack()
