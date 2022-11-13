@@ -1,3 +1,4 @@
+import datetime
 import tkinter as tk
 from tkinter import ttk
 
@@ -33,17 +34,29 @@ class Chat(ttk.Frame):
         self.update_message_widgets()
     
     def update_message_widgets(self):
-        existing_labels = [message["text"] for message in message_labels]
+        existing_labels = [
+            (message["text"], time["text"]) for message, time in message_labels
+        ]
 
         for message in messages:
-            if message["message"] not in existing_labels:
+            message_time = datetime.datetime.fromtimestamp(message["date"]).strftime(
+                "%d-%m-%Y %H:%M:%S"
+            )
+            if (message["message"], message_time) not in existing_labels:
+                container = ttk.Frame(self.messages_frame)
+                container.columnconfigure(1, weight=1)
+                container.grid(sticky="EW", padx=(10, 50), pady=10)
+
+                time_label = ttk.Label(container, text=message_time)
+                time_label.grid(row=0, column=0, sticky="NEW")
+
                 message_label = ttk.Label(
-                    self.messages_frame,
+                    container,
                     text=message["message"],
                     anchor="w",
                     justify="left",
                 )
 
-                message_label.grid(sticky="NSEW")
+                message_label.grid(row=1, column=0, sticky="NSEW")
 
-                message_labels.append(message_label)
+                message_labels.append((message_label, time_label))
