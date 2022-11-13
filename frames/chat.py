@@ -3,6 +3,9 @@ from tkinter import ttk
 
 import requests
 
+messages = [{"message": "Hello, world", "date": 15498487}]
+message_labels = []
+
 
 class Chat(ttk.Frame):
     def __init__(self, container, **kwargs):
@@ -10,6 +13,9 @@ class Chat(ttk.Frame):
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+
+        self.messages_frame = ttk.Frame(self)
+        self.messages_frame.grid(row=0, column=0, sticky="NSEW", pady=5)
 
         input_frame = ttk.Frame(self, padding=10)
         input_frame.grid(row=1, column=0, sticky="EW")
@@ -22,5 +28,22 @@ class Chat(ttk.Frame):
         message_fetch.pack()
     
     def get_messages(self):
+        global messages
         messages = requests.get("http://167.99.63.70/messages").json()
-        print(messages)
+        self.update_message_widgets()
+    
+    def update_message_widgets(self):
+        existing_labels = [message["text"] for message in message_labels]
+
+        for message in messages:
+            if message["message"] not in existing_labels:
+                message_label = ttk.Label(
+                    self.messages_frame,
+                    text=message["message"],
+                    anchor="w",
+                    justify="left",
+                )
+
+                message_label.grid(sticky="NSEW")
+
+                message_labels.append(message_label)
