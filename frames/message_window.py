@@ -4,6 +4,8 @@ from tkinter import ttk
 
 from PIL import Image, ImageTk
 
+MAX_MESSAGE_WIDTH=800
+
 
 class MessageWindow(tk.Canvas):
     def __init__(self, container, *args, **kwargs):
@@ -22,12 +24,16 @@ class MessageWindow(tk.Canvas):
 
         self.bind("<Configure>", configure_window_size)        
         self.message_frame.bind("<Configure>", configure_scroll_region)
+        self.bind_all("<MouseWheel>", self._on_mousewheel)
 
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.yview)
         scrollbar.grid(row=0, column=1, sticky="NS")
 
         self.configure(yscrollcommand=scrollbar.set)
         self.yview_moveto(1.0)
+    
+    def _on_mousewheel(self, event):
+        self.yview_scroll(-int(event.delta / 120), "units")
     
     def update_message_widgets(self, messages, message_labels):
         existing_labels = [
@@ -46,6 +52,11 @@ class MessageWindow(tk.Canvas):
         container.columnconfigure(1, weight=1)
         container.grid(sticky="EW", padx=(10, 50), pady=10)
 
+        def reconfigure_message_labels(event):
+            for label, _ in message_labels:
+                label.configure(wraplength=min(container.winfo_width() - 130, MAX_MESSAGE_WIDTH))
+
+        container.bind("<Configure>", reconfigure_message_labels)
         self._create_message_bubble(container, message_content, message_time, message_labels)
     
     def _create_message_bubble(self, container, message_content, message_time, message_labels):
